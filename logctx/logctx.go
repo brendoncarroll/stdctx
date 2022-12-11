@@ -3,9 +3,12 @@ package logctx
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"golang.org/x/exp/slog"
 )
+
+type Logger = slog.Logger
 
 type Level = slog.Level
 
@@ -18,24 +21,47 @@ const (
 	FatalLevel = Level(16)
 )
 
+type contextKey struct{}
+
 // NewContext returns a new context with sl added to it.
-// It is equivalent to slog.NewContext
-func NewContext(ctx context.Context, sl slog.Logger) context.Context {
-	return slog.NewContext(ctx, sl)
+func NewContext(ctx context.Context, sl *Logger) context.Context {
+	if sl == nil {
+		return ctx
+	}
+	return context.WithValue(ctx, contextKey{}, sl)
 }
+
+var noOpLogger = slog.New(slog.NewTextHandler(io.Discard))
 
 // FromContext gets an slog.Logger from the context.
-// It is equivalent to slog.Ctx
-func FromContext(ctx context.Context) slog.Logger {
-	return slog.Ctx(ctx)
+// FromContext never returns nil, and defaults to a No-Op logger if one has not been set on the context.
+func FromContext(ctx context.Context) *slog.Logger {
+	v := ctx.Value(contextKey{})
+	if v == nil {
+		return &noOpLogger
+	}
+	l := v.(*slog.Logger)
+	if l == nil {
+		return &noOpLogger
+	}
+	return l
 }
 
-func With(ctx context.Context, args ...any) slog.Logger {
-	return FromContext(ctx).With(args)
+// IsSet returns true if a logger is set on the context
+func IsSet(ctx context.Context) bool {
+	v := ctx.Value(contextKey{})
+	return v != nil && v.(*Logger) != nil
 }
 
-func WithGroup(ctx context.Context, name string) slog.Logger {
-	return FromContext(ctx).WithGroup(name)
+func Group(ctx context.Context, name string) context.Context {
+	l := FromContext(ctx).WithGroup(name)
+	return NewContext(ctx, &l)
+}
+
+// Drop removes the logger from the context if it exists
+func Drop(ctx context.Context) context.Context {
+	var x *Logger
+	return context.WithValue(ctx, contextKey{}, x)
 }
 
 func Log(ctx context.Context, level slog.Level, msg string, args ...any) {
