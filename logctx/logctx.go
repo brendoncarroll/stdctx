@@ -13,12 +13,12 @@ type Logger = slog.Logger
 type Level = slog.Level
 
 const (
-	TraceLevel = Level(-8)
-	DebugLevel = slog.DebugLevel
-	InfoLevel  = slog.InfoLevel
-	WarnLevel  = slog.WarnLevel
-	ErrorLevel = slog.ErrorLevel
-	FatalLevel = Level(16)
+	LevelTrace = Level(-8)
+	LevelDebug = slog.LevelDebug
+	LevelInfo  = slog.LevelInfo
+	LevelWarn  = slog.LevelWarn
+	LevelError = slog.LevelError
+	LevelFatal = Level(16)
 )
 
 type contextKey struct{}
@@ -38,11 +38,11 @@ var noOpLogger = slog.New(slog.NewTextHandler(io.Discard))
 func FromContext(ctx context.Context) *slog.Logger {
 	v := ctx.Value(contextKey{})
 	if v == nil {
-		return &noOpLogger
+		return noOpLogger
 	}
 	l := v.(*slog.Logger)
 	if l == nil {
-		return &noOpLogger
+		return noOpLogger
 	}
 	return l
 }
@@ -55,7 +55,7 @@ func IsSet(ctx context.Context) bool {
 
 func Group(ctx context.Context, name string) context.Context {
 	l := FromContext(ctx).WithGroup(name)
-	return NewContext(ctx, &l)
+	return NewContext(ctx, l)
 }
 
 // Drop removes the logger from the context if it exists
@@ -70,27 +70,27 @@ func Log(ctx context.Context, level slog.Level, msg string, args ...any) {
 }
 
 func Trace(ctx context.Context, msg string, args ...any) {
-	Log(ctx, TraceLevel, msg, args)
+	Log(ctx, LevelTrace, msg, args)
 }
 
 func Debug(ctx context.Context, msg string, args ...any) {
-	Log(ctx, DebugLevel, msg, args)
+	Log(ctx, LevelDebug, msg, args)
 }
 
 func Info(ctx context.Context, msg string, args ...any) {
-	Log(ctx, InfoLevel, msg, args)
+	Log(ctx, LevelInfo, msg, args)
 }
 
 func Warn(ctx context.Context, msg string, args ...any) {
-	Log(ctx, WarnLevel, msg, args)
+	Log(ctx, LevelWarn, msg, args)
 }
 
 func Error(ctx context.Context, msg string, args ...any) {
-	Log(ctx, ErrorLevel, msg, args)
+	Log(ctx, LevelError, msg, args)
 }
 
 func Fatal(ctx context.Context, msg string, args ...any) {
-	Log(ctx, FatalLevel, msg, args)
+	Log(ctx, LevelFatal, msg, args)
 }
 
 ////
@@ -103,27 +103,27 @@ func Logln(ctx context.Context, level slog.Level, args ...any) {
 }
 
 func Traceln(ctx context.Context, args ...any) {
-	Logln(ctx, TraceLevel, args...)
+	Logln(ctx, LevelTrace, args...)
 }
 
 func Debugln(ctx context.Context, args ...any) {
-	Logln(ctx, DebugLevel, args...)
+	Logln(ctx, LevelDebug, args...)
 }
 
 func Infoln(ctx context.Context, args ...any) {
-	Logln(ctx, InfoLevel, args...)
+	Logln(ctx, LevelInfo, args...)
 }
 
 func Warnln(ctx context.Context, args ...any) {
-	Logln(ctx, WarnLevel, args...)
+	Logln(ctx, LevelWarn, args...)
 }
 
 func Errorln(ctx context.Context, args ...any) {
-	Logln(ctx, ErrorLevel, args...)
+	Logln(ctx, LevelError, args...)
 }
 
 func Fatalln(ctx context.Context, args ...any) {
-	Logln(ctx, FatalLevel, args...)
+	Logln(ctx, LevelFatal, args...)
 }
 
 ////
@@ -136,25 +136,25 @@ func Logf(ctx context.Context, level slog.Level, fmtStr string, args ...any) {
 }
 
 func Tracef(ctx context.Context, fmt string, args ...any) {
-	Logf(ctx, TraceLevel, fmt, args...)
+	Logf(ctx, LevelTrace, fmt, args...)
 }
 
 func Debugf(ctx context.Context, fmt string, args ...any) {
-	Logf(ctx, DebugLevel, fmt, args...)
+	Logf(ctx, LevelDebug, fmt, args...)
 }
 
 func Infof(ctx context.Context, fmt string, args ...any) {
-	Logf(ctx, InfoLevel, fmt, args...)
+	Logf(ctx, LevelInfo, fmt, args...)
 }
 
 func Warnf(ctx context.Context, fmt string, args ...any) {
-	Logf(ctx, WarnLevel, fmt, args...)
+	Logf(ctx, LevelWarn, fmt, args...)
 }
 
 func Errorf(ctx context.Context, fmt string, args ...any) {
-	Logf(ctx, ErrorLevel, fmt, args...)
+	Logf(ctx, LevelError, fmt, args...)
 }
 
 func Fatalf(ctx context.Context, fmt string, args ...any) {
-	Logf(ctx, FatalLevel, fmt, args...)
+	Logf(ctx, LevelFatal, fmt, args...)
 }
