@@ -3,44 +3,51 @@ package logctx
 import (
 	"context"
 	"fmt"
-	"io"
 
-	"golang.org/x/exp/slog"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
-type Logger = slog.Logger
-
-type Level = slog.Level
+// Level is the level to log at
+type Level = zapcore.Level
 
 const (
-	LevelTrace = Level(-8)
-	LevelDebug = slog.LevelDebug
-	LevelInfo  = slog.LevelInfo
-	LevelWarn  = slog.LevelWarn
-	LevelError = slog.LevelError
-	LevelFatal = Level(16)
+	LevelTrace = zapcore.DebugLevel
+	LevelDebug = zapcore.DebugLevel
+
+	LevelInfo = zapcore.InfoLevel
+
+	LevelWarn  = zapcore.WarnLevel
+	LevelError = zapcore.ErrorLevel
+
+	LevelPanic = zapcore.PanicLevel
+	LevelFatal = zapcore.FatalLevel
 )
+
+type Attr = zap.Field
+
+type Logger = *zap.Logger
+
+var noOpLogger = zap.New(nil)
 
 type contextKey struct{}
 
 // NewContext returns a new context with sl added to it.
-func NewContext(ctx context.Context, sl *Logger) context.Context {
-	if sl == nil {
+func NewContext(ctx context.Context, l Logger) context.Context {
+	if l == nil {
 		return ctx
 	}
-	return context.WithValue(ctx, contextKey{}, sl)
+	return context.WithValue(ctx, contextKey{}, l)
 }
-
-var noOpLogger = slog.New(slog.NewTextHandler(io.Discard))
 
 // FromContext gets an slog.Logger from the context.
 // FromContext never returns nil, and defaults to a No-Op logger if one has not been set on the context.
-func FromContext(ctx context.Context) *slog.Logger {
+func FromContext(ctx context.Context) Logger {
 	v := ctx.Value(contextKey{})
 	if v == nil {
 		return noOpLogger
 	}
-	l := v.(*slog.Logger)
+	l := v.(Logger)
 	if l == nil {
 		return noOpLogger
 	}
@@ -54,7 +61,7 @@ func IsSet(ctx context.Context) bool {
 }
 
 func Group(ctx context.Context, name string) context.Context {
-	l := FromContext(ctx).WithGroup(name)
+	l := FromContext(ctx).Named(name)
 	return NewContext(ctx, l)
 }
 
@@ -64,40 +71,40 @@ func Drop(ctx context.Context) context.Context {
 	return context.WithValue(ctx, contextKey{}, x)
 }
 
-func Log(ctx context.Context, level slog.Level, msg string, args ...any) {
-	sl := FromContext(ctx)
-	sl.Log(level, msg, args...)
+func Log(ctx context.Context, level Level, msg string, attrs ...Attr) {
+	l := FromContext(ctx)
+	l.Log(level, msg, attrs...)
 }
 
-func Trace(ctx context.Context, msg string, args ...any) {
-	Log(ctx, LevelTrace, msg, args)
+func Trace(ctx context.Context, msg string, attrs ...Attr) {
+	Log(ctx, LevelTrace, msg, attrs...)
 }
 
-func Debug(ctx context.Context, msg string, args ...any) {
-	Log(ctx, LevelDebug, msg, args)
+func Debug(ctx context.Context, msg string, attrs ...Attr) {
+	Log(ctx, LevelDebug, msg, attrs...)
 }
 
-func Info(ctx context.Context, msg string, args ...any) {
-	Log(ctx, LevelInfo, msg, args)
+func Info(ctx context.Context, msg string, attrs ...Attr) {
+	Log(ctx, LevelInfo, msg, attrs...)
 }
 
-func Warn(ctx context.Context, msg string, args ...any) {
-	Log(ctx, LevelWarn, msg, args)
+func Warn(ctx context.Context, msg string, attrs ...Attr) {
+	Log(ctx, LevelWarn, msg, attrs...)
 }
 
-func Error(ctx context.Context, msg string, args ...any) {
-	Log(ctx, LevelError, msg, args)
+func Error(ctx context.Context, msg string, attrs ...Attr) {
+	Log(ctx, LevelError, msg, attrs...)
 }
 
-func Fatal(ctx context.Context, msg string, args ...any) {
-	Log(ctx, LevelFatal, msg, args)
+func Fatal(ctx context.Context, msg string, attrs ...Attr) {
+	Log(ctx, LevelFatal, msg, attrs...)
 }
 
 ////
 // Println based
 ////
 
-func Logln(ctx context.Context, level slog.Level, args ...any) {
+func Logln(ctx context.Context, level Level, args ...any) {
 	sl := FromContext(ctx)
 	sl.Log(level, fmt.Sprint(args...))
 }
@@ -130,7 +137,7 @@ func Fatalln(ctx context.Context, args ...any) {
 // Printf based
 ////
 
-func Logf(ctx context.Context, level slog.Level, fmtStr string, args ...any) {
+func Logf(ctx context.Context, level Level, fmtStr string, args ...any) {
 	sl := FromContext(ctx)
 	sl.Log(level, fmt.Sprintf(fmtStr, args...))
 }
