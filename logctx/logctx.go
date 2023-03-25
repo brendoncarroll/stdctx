@@ -71,97 +71,103 @@ func Drop(ctx context.Context) context.Context {
 	return context.WithValue(ctx, contextKey{}, x)
 }
 
-func Log(ctx context.Context, level Level, msg string, attrs ...Attr) {
+func log(ctx context.Context, level Level, msg string, attrs ...Attr) {
 	l := FromContext(ctx)
+	// This is intended to be used by the functions below
+	l = l.WithOptions(zap.AddCallerSkip(2))
 	l.Log(level, msg, attrs...)
 }
 
 func Trace(ctx context.Context, msg string, attrs ...Attr) {
-	Log(ctx, LevelTrace, msg, attrs...)
+	log(ctx, LevelTrace, msg, attrs...)
 }
 
 func Debug(ctx context.Context, msg string, attrs ...Attr) {
-	Log(ctx, LevelDebug, msg, attrs...)
+	log(ctx, LevelDebug, msg, attrs...)
 }
 
 func Info(ctx context.Context, msg string, attrs ...Attr) {
-	Log(ctx, LevelInfo, msg, attrs...)
+	log(ctx, LevelInfo, msg, attrs...)
 }
 
 func Warn(ctx context.Context, msg string, attrs ...Attr) {
-	Log(ctx, LevelWarn, msg, attrs...)
+	log(ctx, LevelWarn, msg, attrs...)
 }
 
 func Error(ctx context.Context, msg string, attrs ...Attr) {
-	Log(ctx, LevelError, msg, attrs...)
+	log(ctx, LevelError, msg, attrs...)
 }
 
 func Fatal(ctx context.Context, msg string, attrs ...Attr) {
-	Log(ctx, LevelFatal, msg, attrs...)
+	log(ctx, LevelFatal, msg, attrs...)
 }
 
 ////
 // Println based
 ////
 
-func Logln(ctx context.Context, level Level, args ...any) {
-	sl := FromContext(ctx)
-	sl.Log(level, fmt.Sprint(args...))
+func logln(ctx context.Context, level Level, args ...any) {
+	l := FromContext(ctx)
+	// This is intended to be used by the functions below
+	l = l.WithOptions(zap.AddCallerSkip(2))
+	l.Log(level, fmt.Sprint(args...))
 }
 
 func Traceln(ctx context.Context, args ...any) {
-	Logln(ctx, LevelTrace, args...)
+	logln(ctx, LevelTrace, args...)
 }
 
 func Debugln(ctx context.Context, args ...any) {
-	Logln(ctx, LevelDebug, args...)
+	logln(ctx, LevelDebug, args...)
 }
 
 func Infoln(ctx context.Context, args ...any) {
-	Logln(ctx, LevelInfo, args...)
+	logln(ctx, LevelInfo, args...)
 }
 
 func Warnln(ctx context.Context, args ...any) {
-	Logln(ctx, LevelWarn, args...)
+	logln(ctx, LevelWarn, args...)
 }
 
 func Errorln(ctx context.Context, args ...any) {
-	Logln(ctx, LevelError, args...)
+	logln(ctx, LevelError, args...)
 }
 
 func Fatalln(ctx context.Context, args ...any) {
-	Logln(ctx, LevelFatal, args...)
+	logln(ctx, LevelFatal, args...)
 }
 
 ////
 // Printf based
 ////
 
-func Logf(ctx context.Context, level Level, fmtStr string, args ...any) {
-	sl := FromContext(ctx)
-	sl.Log(level, fmt.Sprintf(fmtStr, args...))
+func logf(ctx context.Context, level Level, fmtStr string, args ...any) {
+	l := FromContext(ctx)
+	// This is intended to be used by the functions below
+	l = l.WithOptions(zap.AddCallerSkip(2))
+	l.Log(level, fmt.Sprintf(fmtStr, args...))
 }
 
 func Tracef(ctx context.Context, fmt string, args ...any) {
-	Logf(ctx, LevelTrace, fmt, args...)
+	logf(ctx, LevelTrace, fmt, args...)
 }
 
 func Debugf(ctx context.Context, fmt string, args ...any) {
-	Logf(ctx, LevelDebug, fmt, args...)
+	logf(ctx, LevelDebug, fmt, args...)
 }
 
 func Infof(ctx context.Context, fmt string, args ...any) {
-	Logf(ctx, LevelInfo, fmt, args...)
+	logf(ctx, LevelInfo, fmt, args...)
 }
 
 func Warnf(ctx context.Context, fmt string, args ...any) {
-	Logf(ctx, LevelWarn, fmt, args...)
+	logf(ctx, LevelWarn, fmt, args...)
 }
 
 func Errorf(ctx context.Context, fmt string, args ...any) {
-	Logf(ctx, LevelError, fmt, args...)
+	logf(ctx, LevelError, fmt, args...)
 }
 
 func Fatalf(ctx context.Context, fmt string, args ...any) {
-	Logf(ctx, LevelFatal, fmt, args...)
+	logf(ctx, LevelFatal, fmt, args...)
 }
