@@ -3,7 +3,7 @@ package telctx
 import (
 	"context"
 
-	"github.com/brendoncarroll/stdctx/units"
+	"go.brendoncarroll.net/stdctx/units"
 )
 
 type Incrementable interface {

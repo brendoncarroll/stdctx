@@ -3,8 +3,8 @@ package stdctx
 import (
 	"context"
 
-	"github.com/brendoncarroll/stdctx/logctx"
-	"github.com/brendoncarroll/stdctx/telctx"
+	"go.brendoncarroll.net/stdctx/logctx"
+	"go.brendoncarroll.net/stdctx/telctx"
 )
 
 type childConfig struct{}

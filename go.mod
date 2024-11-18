@@ -1,4 +1,4 @@
-module github.com/brendoncarroll/stdctx
+module go.brendoncarroll.net/stdctx
 
 go 1.19
 
